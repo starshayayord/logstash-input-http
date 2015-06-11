@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'logstash-input-http'
-  s.version         = '0.1.1'
+  s.version         = '0.1.2'
   s.licenses = ['Apache License (2.0)']
   s.summary = "This is alpha version of tail http input."
   s.description = "Tail log file from http url"
