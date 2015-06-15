@@ -34,17 +34,17 @@ class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
       $file_size = 0
     else 
       begin
-	    http = Net::HTTP.start(uri.host, uri.port)		
-        response = http.request_head(@url)	    
-	  rescue Errno::ECONNREFUSED
-		  @logger.error("Error: Connection refused")
-		  retry	       		 
-	  end #end exception	
-      $file_size = (response['Content-Length']).to_i	  
+        http = Net::HTTP.start(uri.host, uri.port)
+        response = http.request_head(@url) 
+      rescue Errno::ECONNREFUSED
+        @logger.error("Error: Connection refused")
+        retry
+      end #end exception	
+      $file_size = (response['Content-Length']).to_i
     end #end if start_position
     new_file_size = 0
     Stud.interval(@interval) do
-	  begin 
+      begin 
         http = Net::HTTP.start(uri.host, uri.port)
         response = http.request_head(@url)
         new_file_size = (response['Content-Length']).to_i
@@ -65,10 +65,10 @@ class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
             end
           end # end do
         end #end if code
-	  rescue Errno::ECONNREFUSED
-	    @logger.error("Error: Connection refused")
-	    retry	       		 
-	  end #end exception
+      rescue Errno::ECONNREFUSED
+        @logger.error("Error: Connection refused")
+        retry
+      end #end exception
     end # loop
   end #end run
 end #class
