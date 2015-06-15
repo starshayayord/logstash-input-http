@@ -8,7 +8,7 @@ require "uri"
 
 class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
   class Interrupted < StandardError; end
-  config_name "httpfile"
+  config_name "http_file"
   default :codec, "plain"
 
   # The url to listen on.
