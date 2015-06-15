@@ -5,7 +5,7 @@ require "stud/interval"
 require "socket"
 require "net/http"
 require "uri"
-require "digest/md5"
+
 class LogStash::Inputs::Http < LogStash::Inputs::Base
   class Interrupted < StandardError; end
   config_name "http"
@@ -39,44 +39,26 @@ class LogStash::Inputs::Http < LogStash::Inputs::Base
     end
     new_file_size = 0
     Stud.interval(@interval) do
-      http = Net::HTTP.start(uri.host, uri.port) 
+      http = Net::HTTP.start(uri.host, uri.port)
       response = http.request_head(@url)
       new_file_size = (response['Content-Length']).to_i
-      if new_file_size >= $file_size
-        http = Net::HTTP.new(uri.host, uri.port)
-        headers = { 'Range' => "bytes=#{$file_size}-" }
-        response = http.get(uri.path, headers)
-        if (200..226) === (response.code).to_i
-          $file_size += (response['Content-Length']).to_i
-          messages = (response.body).lstrip
-          messages.each_line do | message |
-            message = message.chomp
-            if message != ''
-              event = LogStash::Event.new("message" => message, "host" => @host)
-              decorate(event)
-              queue << event
-            end
-          end # end do
-        end #end if code 
-      else
-        #new file
-        $file_size = 0
-        http = Net::HTTP.start(uri.host, uri.port) 
-        response = http.get(uri.path)
-        if (200..226) === (response.code).to_i
-          $file_size = (response['Content-Length']).to_i
-          messages = (response.body).lstrip
-          messages.each_line do | message |
-            message = message.chomp
-            if message != ''
-              event = LogStash::Event.new("message" => message, "host" => @host)
-              decorate(event)
-              queue << event
-            end
+      next if new_file_size == $file_size # file not modified
+      $file_size = 0 if new_file_size < $file_size # file truncated => log rotation
+      http = Net::HTTP.new(uri.host, uri.port)
+      headers = { 'Range' => "bytes=#{$file_size}-" }
+      response = http.get(uri.path, headers)
+      if (200..226) === (response.code).to_i
+        $file_size += (response['Content-Length']).to_i
+        messages = (response.body).lstrip
+        messages.each_line do | message |
+          message = message.chomp
+          if message != ''
+            event = LogStash::Event.new("message" => message, "host" => @host)
+            decorate(event)
+            queue << event
           end
-        end #end if code
-      end #end if hash  
-    end # loop  
+        end # end do
+      end #end if code
+    end # loop
   end #end run
 end #class
-
