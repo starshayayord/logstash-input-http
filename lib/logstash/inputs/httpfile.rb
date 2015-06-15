@@ -6,9 +6,9 @@ require "socket"
 require "net/http"
 require "uri"
 
-class LogStash::Inputs::Http < LogStash::Inputs::Base
+class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
   class Interrupted < StandardError; end
-  config_name "http_file"
+  config_name "httpfile"
   default :codec, "plain"
 
   # The url to listen on.
