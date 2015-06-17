@@ -25,38 +25,39 @@ class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
   public
   def register
     @host = Socket.gethostname
-    @logger.info("HTTP PLUGIN LOADED")
+    @logger.info("HTTP_FILE PLUGIN LOADED url=#{@url}")
   end
 
   def run(queue)
     uri = URI(@url)  
     if @start_position == "beginning"
-      $file_size = 0
+      file_size = 0
     else 
       begin
         http = Net::HTTP.start(uri.host, uri.port)
         response = http.request_head(@url) 
       rescue Errno::ECONNREFUSED
-        @logger.error("Error: Connection refused")
+        @logger.error("HTTP_FILE Error: Connection refused url=#{@url}")
         sleep @interval
         retry
       end #end exception
-      $file_size = (response['Content-Length']).to_i
+      file_size = response['Content-Length'].to_i
     end #end if start_position
     new_file_size = 0
     Stud.interval(@interval) do
       begin 
         http = Net::HTTP.start(uri.host, uri.port)
         response = http.request_head(@url)
-        new_file_size = (response['Content-Length']).to_i
-        next if new_file_size == $file_size # file not modified
-        $file_size = 0 if new_file_size < $file_size # file truncated => log rotation
+        new_file_size = response['Content-Length'].to_i
+        @logger.info("HTTP_FILE url=#{@url} file_size=#{file_size} new_file_size=#{new_file_size}")
+        next if new_file_size == file_size # file not modified
+        file_size = 0 if new_file_size < file_size # file truncated => log rotation
         http = Net::HTTP.new(uri.host, uri.port)
-        headers = { 'Range' => "bytes=#{$file_size}-" }
+        headers = { 'Range' => "bytes=#{file_size}-" }
         response = http.get(uri.path, headers)
-        if (200..226) === (response.code).to_i
-          $file_size += (response['Content-Length']).to_i
-          messages = (response.body).lstrip
+        if (200..226) === response.code.to_i
+          file_size += response['Content-Length'].to_i
+          messages = response.body.lstrip
           messages.each_line do | message |
             message = message.chomp
             if message != ''
@@ -67,7 +68,7 @@ class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
           end # end do
         end #end if code
       rescue Errno::ECONNREFUSED
-        @logger.error("Error: Connection refused")
+        @logger.error("HTTP_FILE Error: Connection refused url=#{@url}")
         sleep @interval
         retry
       end #end exception
