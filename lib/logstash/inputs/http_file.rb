@@ -5,6 +5,7 @@ require "stud/interval"
 require "socket"
 require "net/http"
 require "uri"
+require "http"
 
 class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
   class Interrupted < StandardError; end
@@ -29,13 +30,13 @@ class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
   end
 
   def run(queue)
-    uri = URI(@url)  
+    uri = URI(@url)
     if @start_position == "beginning"
       file_size = 0
-    else 
+    else
       begin
         http = Net::HTTP.start(uri.host, uri.port)
-        response = http.request_head(@url) 
+        response = http.request_head(@url)
       rescue Errno::ECONNREFUSED
         @logger.error("HTTP_FILE Error: Connection refused url=#{@url}")
         sleep @interval
@@ -45,19 +46,17 @@ class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
     end #end if start_position
     new_file_size = 0
     Stud.interval(@interval) do
-      begin 
+      begin
         http = Net::HTTP.start(uri.host, uri.port)
         response = http.request_head(@url)
         new_file_size = response['Content-Length'].to_i
         @logger.info("HTTP_FILE url=#{@url} file_size=#{file_size} new_file_size=#{new_file_size}")
         next if new_file_size == file_size # file not modified
         file_size = 0 if new_file_size < file_size # file truncated => log rotation
-        http = Net::HTTP.new(uri.host, uri.port)
-        headers = { 'Range' => "bytes=#{file_size}-" }
-        response = http.get(uri.path, headers)
+        response = HTTP[:Range => "bytes=#{file_size}-#{new_file_size}"].get(@url)
         if (200..226) === response.code.to_i
           file_size += response['Content-Length'].to_i
-          messages = response.body.lstrip
+          messages = response.body.to_s.lstrip
           messages.each_line do | message |
             message = message.chomp
             if message != ''
