@@ -3,8 +3,6 @@ require "logstash/inputs/base"
 require "logstash/namespace"
 require "stud/interval"
 require "socket"
-require "net/http"
-require "uri"
 require "http"
 
 class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
@@ -29,14 +27,12 @@ class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
     @logger.info("HTTP_FILE PLUGIN LOADED url=#{@url}")
   end
 
-  def run(queue)
-    uri = URI(@url)
+  def run(queue)    
     if @start_position == "beginning"
       file_size = 0
     else
-      begin
-        http = Net::HTTP.start(uri.host, uri.port)
-        response = http.request_head(@url)
+      begin        
+        response = HTTP.head(@url);
       rescue Errno::ECONNREFUSED
         @logger.error("HTTP_FILE Error: Connection refused url=#{@url}")
         sleep @interval
@@ -46,9 +42,8 @@ class LogStash::Inputs::HttpFile < LogStash::Inputs::Base
     end #end if start_position
     new_file_size = 0
     Stud.interval(@interval) do
-      begin
-        http = Net::HTTP.start(uri.host, uri.port)
-        response = http.request_head(@url)
+      begin        
+        response = HTTP.head(@url);
         new_file_size = response['Content-Length'].to_i
         @logger.info("HTTP_FILE url=#{@url} file_size=#{file_size} new_file_size=#{new_file_size}")
         next if new_file_size == file_size # file not modified
