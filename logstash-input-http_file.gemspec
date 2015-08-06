@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'logstash-input-http_file'
-  s.version         = '0.1.6'
+  s.version         = '0.1.7'
   s.licenses = ['Apache License (2.0)']
   s.summary = "This is alpha version of tail http input."
   s.description = "Tail log file from http url"
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   # Files
-  s.files = `git ls-files`.split($\)
+  s.files = ["DEVELOPER.md", "Gemfile", "LICENSE", "README.md", "Rakefile", "lib/logstash/inputs/http_file.rb", "logstash-input-http_file.gemspec", "spec/inputs/http_spec.rb"]
    # Tests
   s.test_files = s.files.grep(%r{^(test|spec|features)/})
 
