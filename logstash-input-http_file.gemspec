@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   # Files
-  s.files = ["DEVELOPER.md", "Gemfile", "LICENSE", "README.md", "Rakefile", "lib/logstash/inputs/http_file.rb", "logstash-input-http_file.gemspec", "spec/inputs/http_spec.rb"]
+  s.files = ["lib/logstash/inputs/http_file.rb", "spec/inputs/http_spec.rb"]
    # Tests
   s.test_files = s.files.grep(%r{^(test|spec|features)/})
 
