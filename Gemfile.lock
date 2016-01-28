@@ -1,10 +1,10 @@
 PATH
   remote: .
   specs:
-    logstash-input-http_file (0.1.7)
+    logstash-input-http_file (0.1.8)
       concurrent-ruby (= 0.9.1)
       logstash-codec-plain (~> 1.0)
-      logstash-core (>= 1.4.0, <= 1.5.6)
+      logstash-core (>= 1.4.0)
       stud (~> 0.0.19)
 
 GEM

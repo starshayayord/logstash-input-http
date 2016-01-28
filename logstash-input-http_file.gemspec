@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'logstash-input-http_file'
-  s.version         = '0.1.7'
+  s.version         = '0.1.8'
   s.licenses = ['Apache License (2.0)']
   s.summary = 'This is alpha version of tail http input.'
   s.description = 'Tail log file from http url'
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.metadata = {'logstash_plugin' => 'true', 'logstash_group' => 'input'}
 
   # Gem dependencies
-  s.add_runtime_dependency 'logstash-core', '>= 1.4.0', '<= 1.5.6'
+  s.add_runtime_dependency 'logstash-core', '>= 1.4.0'
   s.add_runtime_dependency 'logstash-codec-plain', '~>1.0'
   s.add_runtime_dependency 'stud', '~> 0.0.19'
   s.add_runtime_dependency 'concurrent-ruby', '0.9.1'
